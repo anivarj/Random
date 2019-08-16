@@ -91,7 +91,7 @@ def run_it():
 		print "Opening " + basename
 		files = os.listdir(directories[3]) # makes a list of all the files in filteredMAX directory
 		for f in files: # finds the MAX projections and only opens them (skips merged)
-			if fnmatch.fnmatch(f, "MAX_C1*"):
+			if fnmatch.fnmatch(f, "MAX_C*"): #finds MAX projections. change if you only want 1 channel
 				IJ.open(os.path.join(directories[3], f))
 
 

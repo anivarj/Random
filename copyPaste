@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 '''
-This script is to prepare an analysis directory for MATLAB processing using the temporal_manual scripts.
-This script should:
+This script is to copy files from multiple folders to a single output location
 1. Ask you for a target directory where your raw data is.
-2. Ask you where you want your analysis output to go.
-3. Get a list of all the raw data folder names and use this to create a new set of folders at the analysis location.
-4. Copy the rawMAX.tif files from each scan folder into the appropriate analysis folder location
+2. Ask you where you want your output data to go
+3. Get a list of all the raw data folder names 
+4. Copy the rawMAX.tif files from each scan folder into the output location
 '''
 
 import os, fnmatch, shutil

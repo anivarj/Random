@@ -13,7 +13,7 @@ for (i=0; i<titles.length; i++){
     name = getTitle(); 
     newName = name.substring(17); //remove the 'Peaks in Plot of ' part of the name
     Plot.showValues("Plot Values");
-    savePath = destination + newName + "-values.csv";
+    savePath = destination + "/" + newName + "-values.csv";
     print(savePath);  
     saveAs("Measurements", savePath);
 }

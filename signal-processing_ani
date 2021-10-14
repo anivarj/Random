@@ -12,11 +12,13 @@ import sys
 import math         
 import fnmatch                                  #filename matching 
 np.seterr(divide='ignore', invalid='ignore')
+import time
+startTime = time.time()
 
 boxSizeInPx = 20                #ENTER DESIRED BOXED SIZE HERE
-plotIndividualACFs = False      #TRUE = PLOTS BOXES; FALSE = ONLY PLOTS POP MEANS
-#plotIndividualCCFs = False      #not functioning
-plotIndividualPeaks = True      #TRUE = plots peaks for each box. 
+plotIndividualACFs = True      #TRUE = PLOTS BOXES; FALSE = ONLY PLOTS POP MEANS
+plotIndividualCCFs = False      #not functioning
+plotIndividualPeaks = False      #TRUE = plots peaks for each box. 
 smoothACF = False               #TRUE = smooths the ACF to better eliminate noisy peaks
 smoothMySignal = True           #TRUE = SMOOTHS THE BOX MEANS PRIOR TO CALCULATING THE WAVE AMPLITUDE AND WIDTHS
 acfPeakProm = 0.1               #prominance value for peak detection
@@ -449,5 +451,7 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
     print(str(round((i+1)/len(fileNames)*100, 1)) + "%" + " Finished with Analysis") #updates progress to terminal window
     
     masterStatsDf.to_csv(os.path.join(directory, '0_filestats.csv'), index=False)    #saves master stats file at the end of the analysis 
-    
+
+executionTime = (time.time() - startTime)
+print('Execution time in seconds: ' + str(executionTime))
     

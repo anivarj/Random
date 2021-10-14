@@ -382,12 +382,14 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         meanCCFDf = plotCF(ccfArray, npts, shifts, "CCF.png")             #plot the CCF function
     
     chBoxMeans = np.array([ch1BoxMeans, ch2BoxMeans])   #3D array of channel means (2ch, nBoxes, npts)
+    
+    '''Find the ACFs for each box, for all channels'''
     acorArrays, periods= findACF(chBoxMeans, npts, nBoxes) #acorArrays = ndarray where each row is the ACF for a box over time. Periods = ndarray of periods for all boxes  
     finalArray = analyzePeaks(chBoxMeans, nBoxes, boxSavePath, npts) #ch1PeakValues = ndarray of peak metrics (width, min, max, amp, relAmp) for each box
-    
     ch1PeakValues = pd.DataFrame(finalArray[0, :, :], columns=['Ch1 Widths', 'Ch1 Maxs', 'Ch1 Mins', 'Ch1 Amps', 'Ch1 RelAmps']) #slices out Channel1 values and makes dataframe
     ch2PeakValues = pd.DataFrame(finalArray[1, :, :], columns=['Ch2 Widths', 'Ch2 Maxs', 'Ch2 Mins', 'Ch2 Amps', 'Ch2 RelAmps']) #slices out Channel2 values and makes dataframe
-        
+    
+    '''Plot individual ACFs for each box if True'''
     if plotIndividualACFs == True: #this is general enough to work for any # channels. probably should turn into a function and use for 1ch/2ch
         for channel in range(0, imageChannels): 
             inputMeans = chBoxMeans[channel,:,:]                     #select the input means for the channel from the chBoxMeans
@@ -396,20 +398,17 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
             subFolderName = "Ch"+str(channel+1)+"ACF_Plots"          #create a subfolder for the output
             plotACFs(inputMeans, chacorArray, chperiods, npts, nBoxes, boxSavePath, subFolderName)  #plot the ACFs for each box, for each channel
         
-     
-    meanCh1ACFDf = plotCF(acorArrays[0, :,:], npts, periods[0], 'Ch1ACF.png')       #plot the mean ACF
-    meanCh1ACFDf.to_csv(os.path.join(boxSavePath,"correlations.csv"), index=False)  #save the mean ACF as a csv
+    '''Plot the average ACF for Ch1'''
+    meanCh1ACFDf = plotCF(acorArrays[0, :,:], npts, periods[0], 'Ch1ACF.png')       #plot the mean Ch1 ACF
+    meanCh1ACFDf.to_csv(os.path.join(boxSavePath,"correlations.csv"), index=False)  #save the mean Ch1 ACF as a csv
     plotPeaks(ch1PeakValues, boxSavePath, "Ch1MeanPeakMeasurements.png")      #plot the ch1PeakValues and save the graphs
     
-    boxMeasurements = pd.DataFrame({  #create a dataframe for measurements from individual boxes
-    'Box#': np.arange(0,nBoxes),      #include box#
-    'Ch1 Periods': periods[0],        #include periods
-    })
 
+    '''Plot Ch2 ACF (if applicable) and set up BoxMeasurements.csv'''
     if imageChannels == 2:
-        meanCh2ACFDf = plotCF(acorArrays[1, :,:], npts, periods[1], 'Ch2ACF.png')           #plot the Ch2 ACF function
-        meanACFDf = mergeAndSave(meanCh1ACFDf, meanCh2ACFDf, boxSavePath, save=False)       #merge Ch1 and Ch2 ACF dataframes together
-        plotPeaks(ch2PeakValues, boxSavePath, "Ch2MeanPeakMeasurements.png")    #plot Ch2 peak values
+        meanCh2ACFDf = plotCF(acorArrays[1, :,:], npts, periods[1], 'Ch2ACF.png')     #plot the Ch2 ACF function
+        meanACFDf = mergeAndSave(meanCh1ACFDf, meanCh2ACFDf, boxSavePath, save=False) #merge Ch1 and Ch2 ACF dataframes together
+        plotPeaks(ch2PeakValues, boxSavePath, "Ch2MeanPeakMeasurements.png")          #plot Ch2 peak values
 
         boxMeasurements = pd.DataFrame({    #create a dataframe for measurements from individual boxes
         'Box#': np.arange(0,nBoxes),
@@ -417,28 +416,36 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         'Ch1 Periods': periods[0],
         'Ch2 Periods': periods[1]
         })
-        peakValues = pd.merge(ch1PeakValues, ch2PeakValues, left_index=True, right_index=True)  
+        peakValues = pd.merge(ch1PeakValues, ch2PeakValues, left_index=True, right_index=True)  #merge all peak values together 
         statsDf = calcListStats(boxMeasurements, 3) #calculates statistics on the boxMeasurements over columns 1 and 2
-    else:
+    
+    else: #create the dataframe entry for 1-channel data (no CCF or Ch2 values)
+        boxMeasurements = pd.DataFrame({  #create a dataframe for measurements from individual boxes
+        'Box#': np.arange(0,nBoxes),      #include box#
+        'Ch1 Periods': periods[0],        #include periods
+        })
+        
         peakValues = ch1PeakValues #if 1-channel, just renames this df 
         statsDf = calcListStats(boxMeasurements, 2) #calculates statistics on the boxMeasurements over columns 1 only
     
+    '''Adding stats values to BoxMeasurements.csv'''
     pcntZeros = calculatePcntZeros(periods)  #calculate %0's in the periods
     boxMeasurements = pd.merge(boxMeasurements, peakValues, left_index=True, right_index=True)           #add the widths, mins, maxs, amps and relAmps from each box to the dataframe
     boxMeasurements[''] = np.NaN                                                                         #adds extra column of space        
     boxMeasurements = pd.merge(boxMeasurements, statsDf, how='outer', left_index=True, right_index=True) #merge the stats calculations into the boxMeasurements dataframe
-    boxMeasurements.to_csv(os.path.join(boxSavePath, "BoxMeasurements.csv"), index=False)     #save the dataframe
+    boxMeasurements.to_csv(os.path.join(boxSavePath, "BoxMeasurements.csv"), index=False)                #save the dataframe
 
+    '''Create entry for 0_filestats.csv (master file)'''
     masterStatsEntry = pd.DataFrame({      #dataframe entry to be added to the master stats csv file containing all movies (at end of script)
         'Filename' : nameWithoutExtension,              
         'Num Boxes' : nBoxes,
         'Ch1 Pcnt Zeros': pcntZeros[0]}, index=[0],)
 
     if imageChannels ==2:
-        masterStatsEntry['Ch2 Pcnt Zeros'] = pcntZeros[1] #add column for ch2 percent 0's if 2-channel
+        masterStatsEntry['Ch2 Pcnt Zeros'] = pcntZeros[1] #if 2-channel, add column for ch2 percent 0's 
     
-    masterStatsEntry = pd.concat([masterStatsEntry, statsDf], axis=1)                #adds the stats data to the entry
-    masterStatsDf = masterStatsDf.append(masterStatsEntry, ignore_index=True)        #adds the entry to the master stats file
+    masterStatsEntry = pd.concat([masterStatsEntry, statsDf], axis=1)                #adds stats data to the master entry
+    masterStatsDf = masterStatsDf.append(masterStatsEntry, ignore_index=True)        #adds the entry to the master stats file (0_filestats.csv)
     print(str(round((i+1)/len(fileNames)*100, 1)) + "%" + " Finished with Analysis") #updates progress to terminal window
     
     masterStatsDf.to_csv(os.path.join(directory, '0_filestats.csv'), index=False)    #saves master stats file at the end of the analysis 

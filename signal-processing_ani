@@ -285,7 +285,7 @@ def mergeAndSave(Df1, Df2, savePath, save=True, fileName=" ", **kwargs):    #mer
         return(mergedDf)
     else:
         return(mergedDf)
-
+    
 def calculatePcntZeros(array):    #calculate the percent zeros (nan's) in an array
     zeros = np.count_nonzero(np.isnan(array), axis=1)   #finds all 'nan' values along a row
     pcntZeros = ((zeros/periods.shape[1])*100)          #calculates percent out of total number of columns
@@ -384,7 +384,8 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         meanCCFDf = plotCF(ccfArray, npts, shifts, "CCF.png")             #plot the CCF function
     
     chBoxMeans = np.array([ch1BoxMeans, ch2BoxMeans])   #3D array of channel means (2ch, nBoxes, npts)
-    
+    del [[ch1BoxMeans, ch2BoxMeans]]
+
     '''Find the ACFs for each box, for all channels'''
     acorArrays, periods= findACF(chBoxMeans, npts, nBoxes) #acorArrays = ndarray where each row is the ACF for a box over time. Periods = ndarray of periods for all boxes  
     finalArray = analyzePeaks(chBoxMeans, nBoxes, boxSavePath, npts) #ch1PeakValues = ndarray of peak metrics (width, min, max, amp, relAmp) for each box
@@ -409,7 +410,6 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
     '''Plot Ch2 ACF (if applicable) and set up BoxMeasurements.csv'''
     if imageChannels == 2:
         meanCh2ACFDf = plotCF(acorArrays[1, :,:], npts, periods[1], 'Ch2ACF.png')     #plot the Ch2 ACF function
-        meanACFDf = mergeAndSave(meanCh1ACFDf, meanCh2ACFDf, boxSavePath, save=False) #merge Ch1 and Ch2 ACF dataframes together
         plotPeaks(ch2PeakValues, boxSavePath, "Ch2MeanPeakMeasurements.png")          #plot Ch2 peak values
 
         boxMeasurements = pd.DataFrame({    #create a dataframe for measurements from individual boxes

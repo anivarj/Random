@@ -358,7 +358,7 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         sys.exit("Are you sure you have a standard sized image with one or two channels?")
 
     if imageChannels ==1:
-        print("starting 2-channel workflow")
+        print("starting 1-channel workflow")
         ch1BoxMeans = findBoxMeans(imageStack, boxSizeInPx)        #ndarray of shape (# boxes, # frames)
         ch2BoxMeans=np.zeros_like((ch1BoxMeans))                  #dummy array simulating a second channel
 

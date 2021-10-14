@@ -12,8 +12,6 @@ import sys
 import math         
 import fnmatch                                  #filename matching 
 np.seterr(divide='ignore', invalid='ignore')
-import time
-startTime = time.time()
 
 boxSizeInPx = 20                #ENTER DESIRED BOXED SIZE HERE
 plotIndividualACFs = True      #TRUE = PLOTS BOXES; FALSE = ONLY PLOTS POP MEANS
@@ -452,6 +450,4 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
     
     masterStatsDf.to_csv(os.path.join(directory, '0_filestats.csv'), index=False)    #saves master stats file at the end of the analysis 
 
-executionTime = (time.time() - startTime)
-print('Execution time in seconds: ' + str(executionTime))
     

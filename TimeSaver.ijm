@@ -11,8 +11,14 @@ for (i=0; i<titles.length; i++){
 		nameWithoutExtension =  substring(name, 0, dotIndex);
 		
 		//put your run commands here
-		run("Z Project...", "projection=[Max Intensity] all");
-		//savePath = "Path/To/Destination/" + nameWithoutExtension; 
-		//saveAs("TIFF", savePath);
+		//run("Properties...");
+		//getPixelSize(unit, pixelWidth, pixelHeight);
+		//interval = Stack.getFrameInterval();
+		//print(name, pixelWidth, interval);
+		
+		//run("Z Project...", "projection=[Max Intensity] all");
+		savePath = "/Volumes/speedyG/Data/fromOthers/George/StarfishMPforAni/MAX/" + nameWithoutExtension; 
+		saveAs("TIFF", savePath);
+		
 }
 

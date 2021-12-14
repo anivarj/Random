@@ -28,5 +28,5 @@ saveAs("TIFF", savePath);
 close();
 
 i = i + 49; //increment number should be changed according to your count. If count = 50, you should increment i by 49 so the next start value = 51
-IJ.freeMemory(); //calls garbage collection to free up memory 
+run("Collect Garbage"); //calls garbage collection to free up memory 
 }

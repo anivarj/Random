@@ -3,9 +3,9 @@
 // In the for loop, set i= to the first slice you want imported
 //In the for loop, set i< to 1 + the last slice you want imported 
 
-for (i = 3801; i < 3840; i++) {
+for (i = 1; i < 3800; i++) {
 start=i; //starting import frame
-count=39; //Set to the chunksize you want to import
+count=50; //Set to the chunksize you want to import
 end = start + count -1; //ending import frame 
 
 print("start:", start);

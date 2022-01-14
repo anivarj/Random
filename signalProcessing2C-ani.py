@@ -32,8 +32,6 @@ root.columnconfigure(2, weight=1)
 #defining variable types for the different widget fields
 boxSizeVar = tk.IntVar()            #variable for box grid size
 boxSizeVar.set(20)                  #set default value 
-smoothMySignalVar = tk.BooleanVar() #variable for smooth my signal option
-smoothMySignalVar.set(True)         #set default value
 plotIndividualACFsVar = tk.BooleanVar()     #variable for plotting individual ACFs
 plotIndividualCCFsVar = tk.BooleanVar()     #variable for plotting individual CCFs
 plotIndividualPeaksVar = tk.BooleanVar()    #variable for plotting individual peaks
@@ -41,9 +39,7 @@ acfPeakPromVar = tk.DoubleVar()             #variable for peak prominance thresh
 acfPeakPromVar.set(0.1)                     #set default value
 groupNamesVar = tk.StringVar()   #variable for group names list
 folderPath = tk.StringVar()      #variable for path to images
-compareFilesVar = tk.BooleanVar() #variable for plotting group-wise comparisons
-exitButtonVar = False #variable for cancel button. set to false automatically
-startButtonVar = False #variable for start button. set to false automatically
+
 
 
 #function for getting path to user's directory
@@ -53,15 +49,12 @@ def getFolderPath():
 
 #function for hitting start button
 def on_start(): 
-    global startButtonVar #references the global variable
-    startButtonVar = True #sets it to true
-    root.destroy() #destroys window
+    root.destroy() #destroys window and runs script
 
 #function for hitting cancel button
 def on_quit(): 
-    global exitButtonVar #references the global variable
-    exitButtonVar = True #sets it to true
     root.destroy() #destroys window
+    sys.exit("You opted to cancel the script")
 
 '''widget creation'''
 #file path selection widget
@@ -86,9 +79,6 @@ ttk.Entry(root,textvariable=groupNamesVar).grid(column=0, row=3, padx=10, sticky
 ttk.Label(root, text='Enter group names separated by commas').grid(column=1, row=3, padx=10, sticky='W') #create label text
 
 #create checkbox widgets and labels
-ttk.Checkbutton(root, variable=smoothMySignalVar).grid(column=0, row=4, sticky='E', padx=15) #smooth my signal
-ttk.Label(root, text='Smooth my signal').grid(column=1, row=4, columnspan=2, padx=10, sticky='W')
-
 ttk.Checkbutton(root, variable=plotIndividualACFsVar).grid(column=0, row=5, sticky='E', padx=15)
 ttk.Label(root, text='Plot individual ACFs').grid(column=1, row=5, columnspan=2, padx=10, sticky='W') #plot individual ACFs
 
@@ -98,8 +88,6 @@ ttk.Label(root, text='Plot individual CCFs').grid(column=1, row=6, columnspan=2,
 ttk.Checkbutton(root, variable=plotIndividualPeaksVar).grid(column=0, row=7, sticky='E', padx=15) #plot individual peaks
 ttk.Label(root, text='Plot individual peaks').grid(column=1, row=7, columnspan=2, padx=10, sticky='W')
 
-ttk.Checkbutton(root, variable=compareFilesVar).grid(column=0, row=8, sticky='E', padx=15) #plot group-wise comparisons
-ttk.Label(root, text='Plot group-wise comparisons').grid(column=1, row=8, columnspan=2, padx=10, sticky='W')
 
 #Creates the 'Start Analysis' button
 startButton = ttk.Button(root, text='Start Analysis', command=on_start) #creates the button and bind it to close the window when clicked
@@ -109,16 +97,12 @@ startButton.grid(column=1, row=9, pady=10, sticky='W') #place it in the tk windo
 cancelButton = ttk.Button(root, text='Cancel', command=on_quit) #creates the button and bind it to on_quit function
 cancelButton.grid(column=0, row=9, pady=10, sticky='E') #place it in the tk window
 
+root.protocol("WM_DELETE_WINDOW", on_quit) #calls on_quit if the root window is x'd out.
 root.mainloop() #run the script
 
-if exitButtonVar == True: #if user hits cancel, print error
-    sys.exit('You opted to cancel the script before running')
-elif exitButtonVar == False and startButtonVar == False: #if user x's out of window, print error
-    sys.exit('You opted to cancel the script before running')
 
 #get the values stored in the widget
 boxSizeInPx = boxSizeVar.get()
-smoothMySignal = smoothMySignalVar.get() 
 plotIndividualACFs= plotIndividualACFsVar.get()
 plotIndividualCCFs = plotIndividualCCFsVar.get()
 plotIndividualPeaks = plotIndividualPeaksVar.get()
@@ -126,17 +110,14 @@ acfPeakProm = acfPeakPromVar.get()
 groupNames = groupNamesVar.get()
 groupNames = [x.strip() for x in groupNames.split(',')] #list of group names. splits string input by commans and removes spaces
 targetWorkspace = folderPath.get() 
-compareFiles = compareFilesVar.get()
 
 #make dictionary of parameters for log file use
 logParams = {
     "Box Size(px)" : boxSizeInPx,
     "ACF Peak Prominence" : acfPeakProm,
     "Group Names" : groupNames,
-    "Smooth My Signal" : smoothMySignal,
     "Plot Individual ACFs" : plotIndividualACFs,
     "Plot Individual CCFs" : plotIndividualCCFs,
-    "Plot group-wise comparisons" : compareFiles
     }
 
 '''processing functions'''
@@ -230,36 +211,34 @@ def analyzePeaks(chBoxMeans, nBoxes, boxSavePath, npts): #find and analyze signa
     for channel in chBoxMeans:        #for each channel in the boxMeans array...
         tempArray = np.zeros(5)       #temporary array for the output from each channel
         for i in range(0, nBoxes):    #for each box...
-            if smoothMySignal == True:                              #if true, smooth the signal
-                smoothed = smoothWithSavgol(channel[i], 11, 2)      
-                minVal = np.min(channel[i])                         #find the minimum
-                maxVal = np.max(channel[i])                         #find the maximum
-                xAxis = np.arange(len(channel[i]))                  #define the xAxis as the length of the correlation (I think redundant with npts)
-                smoothPeaks, smoothedDicts = sig.find_peaks(smoothed, prominence=(maxVal-minVal)*0.1)  #Find peaks in the smoothed data. DETECTED NO PEAKS IN DECAYING DATASET
-                
-                if len(smoothPeaks) > 0:        #if there are peaks to be found....
-                    proms, leftBase, rightBase = sig.peak_prominences(smoothed, smoothPeaks)    #find and store info on the peak prominances, and left/right bounds
-                    widths, heights, leftIndex, rightIndex = sig.peak_widths(smoothed, smoothPeaks, rel_height=0.5) #returns [0]=widths, [1]=heights, [2]=left bound, [3]=right bound (all ndarrays)
-                    if plotIndividualPeaks == True:                             #if this is set to true, it will make a graph for each box's peaks
-                        savePath = os.path.join(boxSavePath, "Peak_Plots")      #where to save the graphs
-                        os.makedirs(savePath, exist_ok=True)                    
-                        printBoxPeaks(channelNumber, channel[i], i, smoothed, smoothPeaks, heights, leftIndex, rightIndex, proms, savePath, nBoxes, npts)  #calls the function that graphs/saves the individual peaks
-                        
-                    width = np.mean(widths, axis=0)                     #calculate mean width of all peaks in box
-                    max = np.mean(smoothed[smoothPeaks], axis=0)        #calculate mean max of all peaks in box
-                    min = np.mean(smoothed[smoothPeaks]-proms, axis=0)  #calculate mean min of all peaks in box
-                    amp = max-min                                       #calculate amp from max and min for all peaks in box
-                    relAmp = amp/min                                    #calculate relative amplitude for all peaks in box
-                
-                else:   #if there are no peaks, return 'NaN'
-                    width = np.NaN
-                    max = np.NaN
-                    min = np.NaN
-                    amp = np.NaN
-                    relAmp = np.NaN
+        
+            smoothed = smoothWithSavgol(channel[i], 11, 2)      
+            minVal = np.min(channel[i])                         #find the minimum
+            maxVal = np.max(channel[i])                         #find the maximum
+            xAxis = np.arange(len(channel[i]))                  #define the xAxis as the length of the correlation (I think redundant with npts)
+            smoothPeaks, smoothedDicts = sig.find_peaks(smoothed, prominence=(maxVal-minVal)*0.1)  #Find peaks in the smoothed data. DETECTED NO PEAKS IN DECAYING DATASET
             
-            else:
-                sys.exit("Keep 'smoothMySignal =True' for now") #Idk why this is hard-coded this way.
+            if len(smoothPeaks) > 0:        #if there are peaks to be found....
+                proms, leftBase, rightBase = sig.peak_prominences(smoothed, smoothPeaks)    #find and store info on the peak prominances, and left/right bounds
+                widths, heights, leftIndex, rightIndex = sig.peak_widths(smoothed, smoothPeaks, rel_height=0.5) #returns [0]=widths, [1]=heights, [2]=left bound, [3]=right bound (all ndarrays)
+                if plotIndividualPeaks == True:                             #if this is set to true, it will make a graph for each box's peaks
+                    savePath = os.path.join(boxSavePath, "Peak_Plots")      #where to save the graphs
+                    os.makedirs(savePath, exist_ok=True)                    
+                    printBoxPeaks(channelNumber, channel[i], i, smoothed, smoothPeaks, heights, leftIndex, rightIndex, proms, savePath, nBoxes, npts)  #calls the function that graphs/saves the individual peaks
+                    
+                width = np.mean(widths, axis=0)                     #calculate mean width of all peaks in box
+                max = np.mean(smoothed[smoothPeaks], axis=0)        #calculate mean max of all peaks in box
+                min = np.mean(smoothed[smoothPeaks]-proms, axis=0)  #calculate mean min of all peaks in box
+                amp = max-min                                       #calculate amp from max and min for all peaks in box
+                relAmp = amp/min                                    #calculate relative amplitude for all peaks in box
+                
+            else:   #if there are no peaks, return 'NaN'
+                width = np.NaN
+                max = np.NaN
+                min = np.NaN
+                amp = np.NaN
+                relAmp = np.NaN
+
             
             peakparams = np.array((width, max, min, amp, relAmp))   #for each box, make an array of the average width, max, min, amp, relAmp
             tempArray = np.vstack((tempArray, peakparams))          #stack the peakparams array into the tempArray for the current channel
@@ -654,7 +633,7 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
     
     masterStatsDf.to_csv(os.path.join(directory, '0_filestats.csv'), index=False)    #saves master stats file at the end of the analysis 
     
-    if compareFiles == True:
+    if groupNames != ['']:
         comparisonsToMake = [columnName + " Mean" for columnName in boxMeasurements.columns] #get a list of the column names to plot
         comparisonsToMake = comparisonsToMake[1:-1] #removes first and last elements from the list ("Box#, and "NaN")
         plotComparisons(masterStatsDf, comparisonsToMake, groupNames) 

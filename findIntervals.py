@@ -57,6 +57,7 @@ def plotIntervals(file, intervals): #plot the intervals over time to spot change
     plt.ylabel('Interval (s)')
     savePath = os.path.join(outputDir, file+"_plot.png")
     plt.savefig(savePath)
+    plt.close()
 
 
 ###### MAIN ######

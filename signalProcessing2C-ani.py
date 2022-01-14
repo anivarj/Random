@@ -16,8 +16,10 @@ import tkinter as tk
 from tkinter.filedialog import askdirectory 
 from tkinter import ttk
 
-np.seterr(divide='ignore', invalid='ignore')
+import timeit
+start = timeit.default_timer()
 
+np.seterr(divide='ignore', invalid='ignore')
 '''GUI Window '''
 #initiates Tk window
 root = tk.Tk()
@@ -637,3 +639,8 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         comparisonsToMake = [columnName + " Mean" for columnName in boxMeasurements.columns] #get a list of the column names to plot
         comparisonsToMake = comparisonsToMake[1:-1] #removes first and last elements from the list ("Box#, and "NaN")
         plotComparisons(masterStatsDf, comparisonsToMake, groupNames) 
+
+stop = timeit.default_timer()
+execution_time = stop - start
+
+print("Program Executed in "+str(execution_time)) # It returns time in seconds

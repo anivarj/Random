@@ -606,9 +606,9 @@ for i in range(len(fileNames)):  #iterates through the .tif files in the specifi
         'Ch1 Periods': periods[0],        #include periods
         })
        
-    peakValues = ch1PeakValues #if 1-channel, just renames this df 
-    peakValues = ch1PeakValues #if 1-channel, just renames this df 
-    peakValues = ch1PeakValues #if 1-channel, just renames this df 
+        peakValues = ch1PeakValues #if 1-channel, just renames this df 
+
+
 
 
     '''Adding stats values to BoxMeasurements.csv'''

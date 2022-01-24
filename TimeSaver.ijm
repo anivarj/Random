@@ -17,7 +17,9 @@ for (i=0; i<titles.length; i++){
 		//print(name, pixelWidth, interval);
 		
 		//run("Z Project...", "projection=[Max Intensity] all");
-		savePath = "/Volumes/speedyG/Data/fromOthers/George/StarfishMPforAni/MAX/" + nameWithoutExtension; 
+		run("Duplicate...", "duplicate range=1-60");
+		nameWithoutExtension = nameWithoutExtension + "_cropped";
+		savePath = "/Volumes/speedyG/Data/2022/Exp304_01-21-2022_SF/Analysis/cropped/" + nameWithoutExtension; 
 		saveAs("TIFF", savePath);
 		
 }

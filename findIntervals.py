@@ -19,7 +19,10 @@ from tkinter.filedialog import askdirectory
 
 def findWorkspace():                                                       #accepts a starting directory and a prompt for the GUI
     targetWorkspace = askdirectory(message='SELECT YOUR XML FILE LOCATION') #choose your raw data location 
-    filelist = [fname for fname in sorted(os.listdir(targetWorkspace)) if fname.endswith('.xml')]   #Makes a list of file names that end with .tif
+    filelist = []
+    for dirpath, dirnames, filenames in os.walk(targetWorkspace):
+        for filename in [f for f in filenames if f.endswith(".xml")]:
+            filelist.append(os.path.join(dirpath, filename))
     return(targetWorkspace, filelist)                                                       #returns the folder path and list of file names
 
 def parseFile(xmlFile): #function that reads XML file and finds root
@@ -46,7 +49,9 @@ def calculateAvg(file, intervals): #calculate the mean and std for the intervals
     #print('FileName:', file, 'Average Interval:', avgInterval, '\u00B1', stdv) #print the average +/- standard deviation
     return([file, avgInterval, stdv])
 
-def plotIntervals(file, intervals): #plot the intervals over time to spot changes
+def plotIntervals(directory, file, intervals): #plot the intervals over time to spot changes
+    noExt = file.rsplit('.')[0]
+    fileName = noExt.split('/')[-1]
     outputDir = os.path.join(directory, "0_plots")
     os.makedirs(outputDir, exist_ok=True) #make output directory
     
@@ -55,7 +60,8 @@ def plotIntervals(file, intervals): #plot the intervals over time to spot change
     plt.title('Z-stack intervals over time')
     plt.xlabel('Time (frames)')
     plt.ylabel('Interval (s)')
-    savePath = os.path.join(outputDir, file+"_plot.png")
+    print('saving to', outputDir, fileName+"_plot.png")
+    savePath = os.path.join(outputDir, fileName+"_plot.png")
     plt.savefig(savePath)
     plt.close()
 
@@ -65,11 +71,10 @@ directory, fileNames = findWorkspace()
 avgIntervals = [['File name', 'Mean Interval (s)', 'Stdv (s)']] #starts list for avgs
 
 for file in fileNames:
-    filePath = os.path.join(directory, file) # full path to the xml file
-    root = parseFile(filePath) #parse the xml file into memory
+    root = parseFile(file) #parse the xml file into memory
     intervals = findIntervals(file, root) #find the intervals for the xml file
     avgIntervals.append(calculateAvg(file, intervals)) #append the filename, avg and std interval to the list
-    plotIntervals(file, intervals)           #generate plots (optional. comment out if do not want)
+    plotIntervals(directory, file, intervals)           #generate plots (optional. comment out if do not want)
 
 
 csvSavePath = os.path.join(directory, "averageIntervals.csv") #save path for csv file of avgs

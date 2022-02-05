@@ -57,10 +57,10 @@ def plotIntervals(dir, fileBase, intervals):                            # plot t
     plt.close()
 
 ###### MAIN ######
-directory, fileNames = findWorkspace()
+directory, filePaths = findWorkspace()
 avgIntervals = [['File name', 'Mean Interval (s)', 'Stdv (s)']]         # starts list for avgs
 
-for file in fileNames:                                                  # iterate through xml files
+for file in filePaths:                                                  # iterate through xml files
     fileBase = os.path.basename(file).rsplit('.')[0]                    # get the base name from full path
     root = parseFile(file)                                              # parse the xml file into memory
     intervals = findIntervals(root)                                     # find the intervals for the xml file

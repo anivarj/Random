@@ -1,4 +1,4 @@
-//This script will get the metadata from raw .tif hyperstacks (NOT MAX PROJECTIONS) and output it to a file
+//This script will get the metadata from raw FV1000 .tif hyperstacks (NOT MAX PROJECTIONS) and output it to a file
 //If you want to record laser power, you must use the hyperstack.
 //The script asks for a directory containing .tif files and imports them one by one
 //The script parses the metadata using bioformats macro extensions and outputs it to a text file in the same directory

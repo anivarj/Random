@@ -16,10 +16,9 @@ for (i=0; i<titles.length; i++){
 		//interval = Stack.getFrameInterval();
 		//print(name, pixelWidth, interval);
 		
-		//run("Z Project...", "projection=[Max Intensity] all");
-		newName = nameWithoutExtension + "-1-100";
-		run("Duplicate...", "duplicate range=1-100");
-		savePath = "/Volumes/speedyG/Data/2022/Exp303_01-13-2022_SF/Analysis/" + newName; 
+		run("Z Project...", "projection=[Max Intensity] all");
+		newName = getTitle();
+		savePath = "/Volumes/speedyG/Data/fromOthers/George/120717_Pm-MPGAP-Ect2-rGBD/day1/processed/" + newName; 
 		saveAs("TIFF", savePath);
 		
 }

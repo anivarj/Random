@@ -20,7 +20,7 @@ for (i=0; i<list.length; i++){
 }
 
 f = File.open(path+"output.txt");    										 //create path to output file
-print(f, "Name \t nChannels \t Ch1Laser \t Ch2Laser \t pxSize \t Interval"); //print headers
+print(f, "Name \t nChannels \t Ch1Laser \t Ch2Laser \t Ch1voltage \t Ch2voltage \t Ch1HV \t Ch2HV \t pxSize \t Interval"); //print headers
 run("Bio-Formats Macro Extensions"); 										//macro extensions for getting metadata
 
 //get metadata for each file in the list
@@ -33,18 +33,29 @@ for (i=0; i<files.length; i++){
 	Ext.getSizeC(sizeC); 				//get nChannels 
 	Ext.getPixelsTimeIncrement(sizeT)   //get interval
 	Ext.getPixelsPhysicalSizeX(sizeX)   //get pixel size
-	Ext.getMetadataValue("[Acquisition Parameters Common] LaserTransmissivity01", Ch1excitation); //get Ch1 laser voltage
-	Ext.getMetadataValue("[Acquisition Parameters Common] LaserTransmissivity02", Ch2excitation); //get Ch2 laser voltage. 
-
+	
+	Ext.getMetadataValue("[Acquisition Parameters Common] LaserWavelength01", Ch1wavelength); //Ch1 laser line
+	Ext.getMetadataValue("[Acquisition Parameters Common] LaserWavelength02", Ch2wavelength); //Ch1 laser line
+	Ext.getMetadataValue("[Acquisition Parameters Common] LaserTransmissivity01", Ch1voltage); //get Ch1 laser voltage
+	Ext.getMetadataValue("[Acquisition Parameters Common] LaserTransmissivity02", Ch2voltage); //get Ch2 laser voltage. 
+	Ext.getMetadataValue("[Channel 1 Parameters] AnalogPMTVoltage", Ch1HV); //get Ch1 gain
+	Ext.getMetadataValue("[Channel 2 Parameters] AnalogPMTVoltage", Ch2HV); //get Ch2 gain
+	
+	
 	//store variables as strings
 	nChannels = toString(sizeC);
-	Ch1Laser = toString(Ch1excitation);
-	Ch2Laser = toString(Ch2excitation);
 	pxSize = toString(sizeX);
 	Interval = toString(sizeT);
+	Ch1wavelength = toString(Ch1wavelength);
+	Ch2wavelength = toString(Ch2wavelength);
+	Ch1voltage = toString(Ch1voltage);
+	Ch2voltage = toString(Ch2voltage);
+	Ch1HV = toString(Ch1HV);
+	Ch2HV = toString(Ch2HV);
+
 
 	//print output to file (tab separated)
-	print(f, toString(title) + " \t " + sizeC + " \t " + Ch1excitation + " \t " + Ch2excitation + " \t " + sizeX + " \t " + sizeT);
+	print(f, toString(title) + " \t " + sizeC + " \t " + Ch1wavelength + " \t " + Ch2wavelength +  " \t " + Ch1voltage + " \t " + Ch2voltage + " \t " + Ch1HV + " \t" + Ch2HV + " \t" + sizeX + " \t " + sizeT);
 	
 	close(title); //close image
 }

@@ -3,7 +3,6 @@
 //The script asks for a directory containing .oif files and imports them one by one
 //The script parses the metadata using bioformats macro extensions and outputs it to a text file in the same directory
 
-
 //Create directory chooser
 Dialog.create("Metadata Parser");  						//title
 Dialog.addDirectory("Choose your files location", ""); //directory chooser
@@ -19,17 +18,17 @@ for (i=0; i<list.length; i++){
 	}		
 }
 
-f = File.open(path+"output.txt");    										 //create path to output file
+f = File.open(path+"output.txt");        //create path to output file
 print(f, "Name \t nChannels \t Ch1Laser \t Ch2Laser \t Ch1voltage \t Ch2voltage \t Ch1HV \t Ch2HV \t pxSize \t Interval"); //print headers
-run("Bio-Formats Macro Extensions"); 										//macro extensions for getting metadata
+run("Bio-Formats Macro Extensions"); 	//macro extensions for getting metadata
 
 //get metadata for each file in the list
 for (i=0; i<files.length; i++){
 	fullpath = path + files[i];
 	//open(fullpath);						//open the file
-	run("Bio-Formats Windowless Importer", "open=" + fullpath);
-	title = getTitle();					//get title
+	run("Bio-Formats Importer", "open=" + fullpath + " autoscale color_mode=Default display_metadata rois_import=[ROI manager] view=[Metadata only] stack_order=Default"); //opens metadata for file
 	Ext.setId(fullpath); 				//set the current image
+	Ext.getMetadataValue("[File Info] DataName", title); //get image name
 	Ext.getSizeC(sizeC); 				//get nChannels 
 	Ext.getPixelsTimeIncrement(sizeT)   //get interval
 	Ext.getPixelsPhysicalSizeX(sizeX)   //get pixel size
@@ -55,9 +54,9 @@ for (i=0; i<files.length; i++){
 
 
 	//print output to file (tab separated)
-	print(f, toString(title) + " \t " + sizeC + " \t " + Ch1wavelength + " \t " + Ch2wavelength +  " \t " + Ch1voltage + " \t " + Ch2voltage + " \t " + Ch1HV + " \t" + Ch2HV + " \t" + sizeX + " \t " + sizeT);
+	print(f, title + " \t " + sizeC + " \t " + Ch1wavelength + " \t " + Ch2wavelength +  " \t " + Ch1voltage + " \t " + Ch2voltage + " \t " + Ch1HV + " \t" + Ch2HV + " \t" + sizeX + " \t " + sizeT);
 	
-	close(title); //close image
+	close("Original Metadata - " + title); //close image
 }
 print("Done with script!");
-Ext.close();
+Ext.close(); //close active dataset

@@ -1,6 +1,6 @@
 //This script will get the metadata from raw FV1000 .tif hyperstacks (NOT MAX PROJECTIONS) and output it to a file
 //If you want to record laser power, you must use the hyperstack.
-//The script asks for a directory containing .tif files and imports them one by one
+//The script asks for a directory containing .oif files and imports them one by one
 //The script parses the metadata using bioformats macro extensions and outputs it to a text file in the same directory
 
 
@@ -12,9 +12,9 @@ path = Dialog.getString(); 							   //get path to the location chosen
 list = getFileList(path); 							   //get list of file names in the directory
 files = newArray();									  //list for file names
 
-//Loop through the directory and find .tif files
+//Loop through the directory and find .oif files
 for (i=0; i<list.length; i++){
-	if (endsWith(list[i], ".tif")){
+	if (endsWith(list[i], ".oif")){
 		files = Array.concat(files, list[i]);	//.tif files are added to the 'files' array
 	}		
 }
@@ -26,7 +26,8 @@ run("Bio-Formats Macro Extensions"); 										//macro extensions for getting me
 //get metadata for each file in the list
 for (i=0; i<files.length; i++){
 	fullpath = path + files[i];
-	open(fullpath);						//open the file
+	//open(fullpath);						//open the file
+	run("Bio-Formats Windowless Importer", "open=" + fullpath);
 	title = getTitle();					//get title
 	Ext.setId(fullpath); 				//set the current image
 	Ext.getSizeC(sizeC); 				//get nChannels 

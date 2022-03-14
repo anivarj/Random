@@ -1,4 +1,5 @@
 # @File(label = "Input directory", style = "directory") experimentFolder
+# @String(label = "Pattern Match", choices={"MAX*","MAX_C1*", "MAX_C2*", "Merged*"}, style="radioButtonHorizontal") myChoice
 
 """
 ##AUTHOR: Ani Michaud (Varjabedian)
@@ -22,6 +23,7 @@ from ij.gui import GenericDialog
 from ij import IJ
 
 experimentFolder = str(experimentFolder) # Converts the input directory you chose to a path string that can be used later on
+myChoice = str(myChoise) #converts search term to string
 
 # Microscope_check assesses the file structure of the experimentFolder and assigns a "microscope type" which gets passed to other functions. This helps with determining where certain files and directories should be located.
 def microscope_check(experimentFolder):
@@ -93,7 +95,7 @@ def run_it():
 		print "Opening " + basename
 		files = os.listdir(directories[4]) # makes a list of all the files in rawMAX directory
 		for f in files: # finds the MAX projections and only opens them (skips merged)
-			if fnmatch.fnmatch(f, "MAX_C1*"): #finds MAX projections. change if you only want 1 channel
+			if fnmatch.fnmatch(f, myChoice): #finds whatever string you specify in the param box
 				IJ.open(os.path.join(directories[4], f))
 				IJ.run("Out [-]", f) #zoom out one level
 

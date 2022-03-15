@@ -23,7 +23,7 @@ from ij.gui import GenericDialog
 from ij import IJ
 
 experimentFolder = str(experimentFolder) # Converts the input directory you chose to a path string that can be used later on
-myChoice = str(myChoise) #converts search term to string
+myChoice = str(myChoice) #converts search term to string
 
 # Microscope_check assesses the file structure of the experimentFolder and assigns a "microscope type" which gets passed to other functions. This helps with determining where certain files and directories should be located.
 def microscope_check(experimentFolder):

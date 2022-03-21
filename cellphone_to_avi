@@ -1,0 +1,38 @@
+# This code was created to concatenate and export an .AVI file from a list of .JPGs
+# Things you need to change:
+    # LINE 10: The path to your image folder
+    # LINE 15: File recognition pattern (line 14)
+
+import cv2
+import os
+
+
+folder = "/Volumes/speedyG/Data/2022/Exp309_03-18-2022_cellphone" #folder where images are stored
+fileList = [] #empty list for paths
+
+#scan folder of images and make a list of all the .JPG files. Eliminates files that start with '.'
+for file in os.listdir(folder):
+    if file.startswith('IMG') and file.endswith('.jpg'):
+        filepath = os.path.join(folder, file)
+        fileList.append(filepath)
+
+fileList = sorted(fileList) #sort the list alphabetically
+img = [] #empty list for the concatenated list of image arrays
+
+for i in range(0, len(fileList)): #cycle through fileList and append each .jpg to the img list
+     img.append(cv2.imread(fileList[i]))
+
+height = img[0].shape[0] #get height dimension of single image
+width = img[0].shape[1] #get width dimension of single image
+
+savePath = os.path.join(folder, "concat.avi") #path for export and file name
+fourcc = cv2.VideoWriter_fourcc(*'MJPG') #codec for export
+video = cv2.VideoWriter(savePath,fourcc, 30.0, (width, height)) #video writer object with parameters
+
+for k in img: #for each image in the img list, write to the AVI file
+    video.write(k)
+
+cv2.destroyAllWindows() #close any cv2 windows
+video.release() #close the video writer
+
+

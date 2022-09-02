@@ -3,7 +3,7 @@
 
 //get list of all open image windows
 titles = getList("image.titles");
-
+//outputPath = getDirectory("Get File"); //asks where you want to save files (if saving).
 for (i=0; i<titles.length; i++){
 		selectWindow(titles[i]);
 		name = getTitle();
@@ -16,9 +16,9 @@ for (i=0; i<titles.length; i++){
 		//interval = Stack.getFrameInterval();
 		//print(name, pixelWidth, interval);
 		
-		run("Z Project...", "projection=[Max Intensity] all");
+		//run("Z Project...", "projection=[Max Intensity] all");
 		newName = getTitle();
-		savePath = "/Volumes/speedyG/Data/fromOthers/George/120717_Pm-MPGAP-Ect2-rGBD/day1/processed/" + newName; 
+		savePath = outputPath + newName; //full path to save location
 		saveAs("TIFF", savePath);
 		
 }
